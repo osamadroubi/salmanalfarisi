@@ -739,3 +739,187 @@ img, svg{max-width:100%;height:auto}
   .story-card{padding:14px}
   .story-art img{max-height:168px}
 }
+
+/* Full-content memorization mode: transforms the page into compact study cards, not just a highlighted frame. */
+.memory-mode-only{display:none!important}
+body.memorize-mode{
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb,var(--gold) 22%,transparent), transparent 28rem),
+    linear-gradient(180deg, color-mix(in srgb,var(--surface-2) 38%,var(--bg)), var(--bg));
+}
+body.memorize-mode .reading-progress span{background:linear-gradient(90deg,var(--accent-2),var(--gold))}
+body.memorize-mode .hero{padding-bottom:24px}
+body.memorize-mode .hero-grid{grid-template-columns:1fr;gap:16px;padding-top:26px}
+body.memorize-mode .hero-figure,
+body.memorize-mode .install-card,
+body.memorize-mode .hero-badges{display:none}
+body.memorize-mode .hero-copy{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px;
+}
+body.memorize-mode .hero-copy .eyebrow::after{
+  content:" • بطاقات مختصرة";
+  color:var(--accent-2);
+}
+body.memorize-mode h1{font-size:clamp(2rem,7vw,3.4rem);max-width:none;letter-spacing:-.03em}
+body.memorize-mode .lead{
+  max-width:70ch;
+  color:var(--ink);
+  background:color-mix(in srgb,var(--gold) 14%,var(--surface));
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:14px;
+}
+body.memorize-mode .hero-cta{margin-top:14px}
+body.memorize-mode .hero-cta .primary{background:var(--accent);color:#fff}
+body.memorize-mode .memory-panel{
+  grid-template-columns:1fr;
+  background:linear-gradient(135deg, color-mix(in srgb,var(--accent-2) 12%,var(--surface)), var(--surface));
+  border-width:2px;
+}
+body.memorize-mode .memory-steps article,
+body.memorize-mode .review-routine{
+  background:color-mix(in srgb,var(--gold) 14%,var(--surface));
+}
+body.memorize-mode .memory-route{
+  display:block!important;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px;
+  margin-bottom:22px;
+}
+.memory-route-head p{color:var(--muted)}
+.memory-route-head h2{font-size:clamp(1.6rem,4vw,2.6rem)}
+.memory-route-list{
+  list-style:none;
+  padding:0;
+  margin:18px 0 0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  counter-reset:none;
+}
+.memory-route-list li{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:4px 10px;
+  align-items:start;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:12px;
+}
+.memory-route-list span{
+  grid-row:1 / span 2;
+  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  background:var(--accent-2);color:#fff;font-weight:900;font-variant-numeric:tabular-nums;
+}
+.memory-route-list b{line-height:1.45;color:var(--ink)}
+.memory-route-list em{font-style:normal;color:var(--muted);font-size:.92rem;line-height:1.55}
+body.memorize-mode .story{gap:14px}
+body.memorize-mode .story-section{
+  display:block;
+  scroll-margin-top:18px;
+}
+body.memorize-mode .story-art{display:none}
+body.memorize-mode .story-card{
+  padding:16px;
+  border-radius:22px;
+  background:linear-gradient(135deg, color-mix(in srgb,var(--surface) 90%,var(--gold)), var(--surface));
+}
+body.memorize-mode .story-card > .section-meta,
+body.memorize-mode .story-card > h2,
+body.memorize-mode .story-card > p,
+body.memorize-mode .story-card > .lesson,
+body.memorize-mode .story-card > .memory-box{display:none!important}
+body.memorize-mode .memory-transform-card{
+  display:grid!important;
+  gap:14px;
+}
+.memory-transform-top{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px;
+  align-items:center;
+}
+.memory-number{
+  width:46px;height:46px;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));
+  color:#fff;font-weight:900;font-variant-numeric:tabular-nums;
+}
+.memory-transform-top small{display:block;color:var(--muted);font-weight:800;margin-bottom:3px}
+.memory-transform-top h3{font-size:clamp(1.25rem,3.8vw,2rem);line-height:1.35}
+.memory-transform-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.memory-point{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:13px;
+}
+.memory-point b{display:block;color:var(--accent);margin-bottom:5px}
+.memory-point p{margin:0;color:var(--ink)!important;line-height:1.65;font-size:1rem}
+.primary-point{
+  grid-column:1 / -1;
+  background:color-mix(in srgb,var(--gold) 18%,var(--surface));
+  border-color:color-mix(in srgb,var(--gold) 58%,var(--line));
+}
+.memory-answer{
+  margin-top:10px;
+  border:1px dashed color-mix(in srgb,var(--accent) 45%,var(--line));
+  border-radius:14px;
+  padding:9px 10px;
+  background:var(--surface);
+}
+.memory-answer summary{cursor:pointer;font-weight:900;color:var(--accent-2)}
+.source-point p{font-size:.92rem;color:var(--muted)!important}
+body.memorize-mode .full-story-drawer{
+  display:block!important;
+  margin-top:12px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--surface);
+  overflow:hidden;
+}
+.full-story-drawer summary{cursor:pointer;font-weight:900;color:var(--accent-2);padding:12px 14px}
+.full-story-drawer div{padding:0 14px 14px}
+.full-story-drawer p{color:var(--muted)!important;margin:.8rem 0;line-height:1.8}
+body.memorize-mode .sources-drawer{
+  opacity:1!important;
+  margin-top:12px;
+  background:color-mix(in srgb,var(--surface-2) 70%,var(--surface));
+}
+body.memorize-mode .source-policy,
+body.memorize-mode .references{
+  box-shadow:none;
+  background:color-mix(in srgb,var(--surface) 92%,var(--surface-2));
+}
+body.memorize-mode .toc-toggle{
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+}
+
+@media (max-width:760px){
+  body.memorize-mode .hero-copy{padding:16px;border-radius:22px}
+  body.memorize-mode .lead{padding:12px;border-radius:16px;font-size:.96rem}
+  body.memorize-mode .memory-route{padding:16px;border-radius:22px;margin-bottom:16px}
+  .memory-route-list{grid-template-columns:1fr;gap:8px}
+  .memory-route-list li{border-radius:16px;padding:10px}
+  .memory-route-list span{width:32px;height:32px;border-radius:12px}
+  .memory-transform-grid{grid-template-columns:1fr}
+  .memory-transform-top{gap:10px}
+  .memory-number{width:40px;height:40px;border-radius:14px}
+  .memory-point{padding:11px;border-radius:16px}
+}
+body.memorize-mode .memory-transform-card p,
+body.memorize-mode .full-story-drawer p,
+body.memorize-mode .memory-route p,
+body.memorize-mode .memory-route em,
+body.memorize-mode .memory-panel p{opacity:1!important}

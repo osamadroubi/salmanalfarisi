@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salman-farsi-pwa-v4-mobile-fix';
+const CACHE_NAME = 'salman-farsi-pwa-v5-memory-transform';
 const ASSETS = [
   './',
   './index.html',

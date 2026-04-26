@@ -70,15 +70,117 @@ fontDecrease?.addEventListener('click', () => {
 });
 applyFontLevel();
 
+function escapeHTML(value){
+  return String(value || '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+}
+
+function buildMemorizationView(){
+  const story = document.querySelector('.story');
+  if (!story || document.querySelector('.memory-route')) return;
+
+  const routeItems = sections.map((section, index) => {
+    const title = section.querySelector('.story-card h2')?.textContent.trim() || '';
+    const summary = section.querySelector('.memory-summary span')?.textContent.trim() || '';
+    return `<li><span>${String(index + 1).padStart(2,'0')}</span><b>${escapeHTML(title)}</b><em>${escapeHTML(summary)}</em></li>`;
+  }).join('');
+
+  const route = document.createElement('section');
+  route.className = 'memory-route memory-mode-only';
+  route.setAttribute('aria-label','خريطة الحفظ المختصرة');
+  route.innerHTML = `
+    <div class="memory-route-head">
+      <p class="eyebrow">وضع الحفظ</p>
+      <h2>خريطة مختصرة قبل القراءة</h2>
+      <p>هذه الخريطة تجمع السيرة في ترتيب سريع. مرّي عليها أولًا، ثم افتحي بطاقات الحفظ في كل مشهد.</p>
+    </div>
+    <ol class="memory-route-list">${routeItems}</ol>
+  `;
+  story.before(route);
+
+  sections.forEach((section, index) => {
+    const card = section.querySelector('.story-card');
+    if (!card || card.querySelector('.memory-transform-card')) return;
+
+    const title = card.querySelector('h2')?.textContent.trim() || '';
+    const meta = card.querySelector('.section-meta span')?.textContent.trim() || `المشهد ${index + 1}`;
+    const rank = card.querySelector('.section-meta strong')?.textContent.trim() || '';
+    const summary = card.querySelector('.memory-summary span')?.textContent.trim() || '';
+    const lesson = card.querySelector('.lesson span')?.textContent.trim() || '';
+    const question = card.querySelector('.quiz-question')?.textContent.trim() || '';
+    const answer = card.querySelector('.answer-card p')?.textContent.trim() || '';
+    const sources = Array.from(card.querySelectorAll('.source-chip')).slice(0, 2).map(a => a.textContent.trim()).join('، ');
+    const fullParagraphs = Array.from(card.children)
+      .filter(el => el.tagName === 'P')
+      .map(p => `<p>${escapeHTML(p.textContent.trim())}</p>`)
+      .join('');
+
+    const memoryCard = document.createElement('div');
+    memoryCard.className = 'memory-transform-card memory-mode-only';
+    memoryCard.innerHTML = `
+      <div class="memory-transform-top">
+        <span class="memory-number">${String(index + 1).padStart(2,'0')}</span>
+        <div>
+          <small>${escapeHTML(meta)}${rank ? ' • ' + escapeHTML(rank) : ''}</small>
+          <h3>${escapeHTML(title)}</h3>
+        </div>
+      </div>
+      <div class="memory-transform-grid">
+        <div class="memory-point primary-point">
+          <b>الجملة التي تُحفظ</b>
+          <p>${escapeHTML(summary)}</p>
+        </div>
+        <div class="memory-point">
+          <b>المغزى</b>
+          <p>${escapeHTML(lesson)}</p>
+        </div>
+        <div class="memory-point">
+          <b>اختبار سريع</b>
+          <p>${escapeHTML(question)}</p>
+          <details class="memory-answer">
+            <summary>إظهار الجواب</summary>
+            <p>${escapeHTML(answer)}</p>
+          </details>
+        </div>
+        <div class="memory-point source-point">
+          <b>مصدر التثبيت</b>
+          <p>${escapeHTML(sources || 'راجعي مصادر هذا المشهد في نهاية البطاقة.')}</p>
+        </div>
+      </div>
+    `;
+
+    const marker = card.querySelector('h2');
+    marker ? marker.after(memoryCard) : card.prepend(memoryCard);
+
+    if (fullParagraphs) {
+      const fullText = document.createElement('details');
+      fullText.className = 'full-story-drawer memory-mode-only';
+      fullText.innerHTML = `<summary>فتح النص القصصي الكامل لهذا المشهد</summary><div>${fullParagraphs}</div>`;
+      card.appendChild(fullText);
+    }
+  });
+}
+
+buildMemorizationView();
+
+function setMemorizeLabel(on){
+  if (!memorizeToggle) return;
+  memorizeToggle.textContent = on ? 'وضع القراءة' : 'وضع الحفظ';
+  memorizeToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+  memorizeToggle.setAttribute('aria-label', on ? 'العودة إلى وضع القراءة' : 'تفعيل وضع الحفظ');
+}
+
 if (localStorage.getItem('memorizeMode') === 'on') {
   document.body.classList.add('memorize-mode');
-  if (memorizeToggle) memorizeToggle.textContent = 'إيقاف الحفظ';
 }
+setMemorizeLabel(document.body.classList.contains('memorize-mode'));
 memorizeToggle?.addEventListener('click', () => {
   document.body.classList.toggle('memorize-mode');
   const on = document.body.classList.contains('memorize-mode');
   localStorage.setItem('memorizeMode', on ? 'on' : 'off');
-  memorizeToggle.textContent = on ? 'إيقاف الحفظ' : 'وضع الحفظ';
+  setMemorizeLabel(on);
+  if (on) {
+    document.getElementById('memory')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
 });
 
 // PWA install support
