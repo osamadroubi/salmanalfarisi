@@ -19,6 +19,12 @@
   <a class="skip-link" href="#content">تجاوز إلى المحتوى</a>
   <div class="reading-progress" aria-hidden="true"><span id="progressBar"></span></div>
 
+  <button class="toc-toggle" id="tocToggle" type="button" aria-controls="tocDrawer" aria-expanded="false">
+    <span aria-hidden="true">&#9776;</span>
+    <span>الفهرس</span>
+  </button>
+  <div class="toc-backdrop" id="tocBackdrop" hidden></div>
+
   <header class="hero" id="top">
     <nav class="topbar" aria-label="التنقل الرئيسي">
       <a class="brand" href="#top" aria-label="العودة إلى البداية">
@@ -71,10 +77,13 @@
   </header>
 
   <main id="content">
-    <aside class="toc-wrap" aria-label="فهرس المحاور">
+    <aside class="toc-wrap toc-drawer" id="tocDrawer" aria-label="فهرس المحاور" aria-hidden="true">
       <div class="toc-card">
         <div class="toc-head">
-          <h2>الفهرس</h2>
+          <div class="toc-title-row">
+            <h2>الفهرس</h2>
+            <button class="toc-close" id="tocClose" type="button" aria-label="إغلاق الفهرس">إغلاق</button>
+          </div>
           <input id="filterInput" type="search" placeholder="ابحث داخل المحاور..." aria-label="البحث داخل المحاور">
         </div>
         <nav class="toc">
@@ -120,7 +129,7 @@
       </div>
       <div class="review-routine">
         <h3>برنامج مراجعة خفيف</h3>
-        <p><b>اليوم الأول:</b> المشاهد 1–4. <b>اليوم الثاني:</b> المشاهد 5–8. <b>اليوم الثالث:</b> المشاهد 9–12. <b>اليوم الرابع:</b> مراجعة كاملة من الفهرس الجانبي.</p>
+        <p><b>اليوم الأول:</b> المشاهد 1–4. <b>اليوم الثاني:</b> المشاهد 5–8. <b>اليوم الثالث:</b> المشاهد 9–12. <b>اليوم الرابع:</b> مراجعة كاملة من زر الفهرس الجانبي.</p>
       </div>
     </section>
 

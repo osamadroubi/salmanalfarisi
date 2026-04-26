@@ -487,3 +487,127 @@ body.extra-large-text{font-size:132%}
   .install-card{grid-template-columns:1fr}
   .install-card button{width:100%}
 }
+
+/* Update: place each illustration above its story text to avoid wide side gaps. */
+.story-section,
+.story-section:nth-child(even){
+  grid-template-columns:1fr;
+  gap:14px;
+  align-items:start;
+}
+.story-section:nth-child(even) .story-art{order:0}
+.story-art{
+  min-height:auto;
+  padding:12px;
+}
+.story-art img{
+  width:min(100%,720px);
+  max-height:320px;
+  object-fit:contain;
+  margin-inline:auto;
+}
+.story-card{margin-top:0}
+@media (max-width:560px){
+  .story-section{gap:10px}
+  .story-art{padding:10px;border-radius:22px}
+  .story-art img{max-height:240px;border-radius:18px}
+}
+
+/* Update: off-canvas table of contents. The full index no longer scrolls beside the reader. */
+main{
+  display:block;
+  max-width:var(--max);
+  margin:0 auto;
+  padding:0 20px 70px;
+}
+main > .toc-wrap,
+main > .memory-panel,
+main > .story,
+main > .source-policy,
+main > .references{grid-column:auto;grid-row:auto}
+
+.toc-toggle{
+  position:fixed;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:80;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:46px;
+  border:1px solid var(--line);
+  border-radius:999px 0 0 999px;
+  padding:10px 14px 10px 18px;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));
+  color:#fff;
+  box-shadow:0 12px 34px rgba(0,0,0,.18);
+  font-weight:900;
+  cursor:pointer;
+}
+.toc-toggle span:first-child{font-size:1.2rem;line-height:1}
+.toc-toggle:hover{filter:brightness(1.05)}
+.toc-toggle:focus-visible,.toc-close:focus-visible{outline:3px solid color-mix(in srgb,var(--gold) 70%,transparent);outline-offset:3px}
+
+.toc-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:78;
+  background:rgba(17,24,39,.46);
+  backdrop-filter:blur(3px);
+}
+.toc-backdrop[hidden]{display:none}
+
+.toc-drawer{
+  position:fixed!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  z-index:90;
+  width:min(420px,92vw);
+  max-height:none!important;
+  margin:0!important;
+  transform:translateX(105%);
+  transition:transform .26s ease;
+  pointer-events:none;
+}
+body.toc-open .toc-drawer{transform:translateX(0);pointer-events:auto}
+body.toc-open{overflow:hidden}
+.toc-drawer .toc-card{
+  height:100dvh;
+  max-height:none;
+  border-radius:0 0 0 28px;
+  padding:18px;
+  overflow:auto;
+  box-shadow:-18px 0 52px rgba(0,0,0,.18);
+}
+.toc-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.toc-title-row h2{font-size:1.2rem}
+.toc-close{
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--surface-2);
+  color:var(--ink);
+  padding:8px 12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.toc-drawer .toc{max-height:none;overflow:visible}
+
+@media (max-width:700px){
+  .toc-toggle{
+    top:auto;
+    bottom:18px;
+    right:14px;
+    transform:none;
+    border-radius:999px;
+    padding:11px 16px;
+  }
+  .toc-drawer{width:min(380px,94vw)}
+  .toc-drawer .toc-card{border-radius:0 0 0 24px}
+}

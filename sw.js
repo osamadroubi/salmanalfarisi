@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salman-farsi-pwa-v1';
+const CACHE_NAME = 'salman-farsi-pwa-v3';
 const ASSETS = [
   './',
   './index.html',

@@ -115,3 +115,41 @@ if (isStandalone) {
   if (installButton) installButton.hidden = true;
   if (installHint) installHint.textContent = 'الموقع مفتوح الآن كتطبيق مستقل.';
 }
+
+// Off-canvas table of contents
+const tocToggle = document.getElementById('tocToggle');
+const tocDrawer = document.getElementById('tocDrawer');
+const tocClose = document.getElementById('tocClose');
+const tocBackdrop = document.getElementById('tocBackdrop');
+
+function openToc(){
+  document.body.classList.add('toc-open');
+  tocToggle?.setAttribute('aria-expanded','true');
+  tocDrawer?.setAttribute('aria-hidden','false');
+  if (tocBackdrop) tocBackdrop.hidden = false;
+  setTimeout(() => filter?.focus({preventScroll:true}), 80);
+}
+function closeToc(){
+  document.body.classList.remove('toc-open');
+  tocToggle?.setAttribute('aria-expanded','false');
+  tocDrawer?.setAttribute('aria-hidden','true');
+  if (tocBackdrop) tocBackdrop.hidden = true;
+  tocToggle?.focus({preventScroll:true});
+}
+
+tocToggle?.addEventListener('click', () => {
+  document.body.classList.contains('toc-open') ? closeToc() : openToc();
+});
+tocClose?.addEventListener('click', closeToc);
+tocBackdrop?.addEventListener('click', closeToc);
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && document.body.classList.contains('toc-open')) closeToc();
+});
+links.forEach(link => link.addEventListener('click', () => {
+  if (document.body.classList.contains('toc-open')) {
+    document.body.classList.remove('toc-open');
+    tocToggle?.setAttribute('aria-expanded','false');
+    tocDrawer?.setAttribute('aria-hidden','true');
+    if (tocBackdrop) tocBackdrop.hidden = true;
+  }
+}));
