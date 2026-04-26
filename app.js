@@ -1,16 +1,29 @@
 
 const root = document.documentElement;
+const liveRegion = document.getElementById('liveRegion');
+function announce(message){
+  if (!liveRegion) return;
+  liveRegion.textContent = '';
+  setTimeout(() => { liveRegion.textContent = message; }, 20);
+}
 const toggle = document.getElementById('themeToggle');
 const storedTheme = localStorage.getItem('theme');
+function setThemeToggleLabel(){
+  if (!toggle) return;
+  const dark = root.classList.contains('dark');
+  toggle.innerHTML = `<span aria-hidden="true">${dark ? '☀' : '☾'}</span><b>${dark ? 'نهار' : 'ليل'}</b>`;
+  toggle.setAttribute('aria-label', dark ? 'تبديل إلى الوضع النهاري' : 'تبديل إلى الوضع الليلي');
+}
 if (storedTheme === 'dark') {
   root.classList.add('dark');
-  toggle.textContent = 'الوضع النهاري';
 }
+setThemeToggleLabel();
 toggle?.addEventListener('click', () => {
   root.classList.toggle('dark');
   const dark = root.classList.contains('dark');
   localStorage.setItem('theme', dark ? 'dark' : 'light');
-  toggle.textContent = dark ? 'الوضع النهاري' : 'الوضع الليلي';
+  setThemeToggleLabel();
+  announce(dark ? 'تم تفعيل الوضع الليلي' : 'تم تفعيل الوضع النهاري');
 });
 
 const progress = document.getElementById('progressBar');
@@ -62,11 +75,13 @@ fontIncrease?.addEventListener('click', () => {
   fontLevel = Math.min(2, fontLevel + 1);
   localStorage.setItem('fontLevel', String(fontLevel));
   applyFontLevel();
+  announce(fontLevel === 2 ? 'تم تكبير الخط إلى أكبر حجم' : 'تم تكبير الخط');
 });
 fontDecrease?.addEventListener('click', () => {
   fontLevel = Math.max(0, fontLevel - 1);
   localStorage.setItem('fontLevel', String(fontLevel));
   applyFontLevel();
+  announce(fontLevel === 0 ? 'تم تصغير الخط إلى الحجم الأساسي' : 'تم تصغير الخط');
 });
 applyFontLevel();
 
@@ -164,22 +179,300 @@ buildMemorizationView();
 
 function setMemorizeLabel(on){
   if (!memorizeToggle) return;
-  memorizeToggle.textContent = on ? 'وضع القراءة' : 'وضع الحفظ';
+  memorizeToggle.innerHTML = `<span aria-hidden="true">${on ? '☷' : '▣'}</span><b>${on ? 'القصة' : 'الحفظ'}</b>`;
   memorizeToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
-  memorizeToggle.setAttribute('aria-label', on ? 'العودة إلى وضع القراءة' : 'تفعيل وضع الحفظ');
+  memorizeToggle.setAttribute('aria-label', on ? 'العودة إلى وضع القراءة والقصة الكاملة' : 'تفعيل وضع الحفظ كبطاقات مختصرة');
 }
 
-if (localStorage.getItem('memorizeMode') === 'on') {
-  document.body.classList.add('memorize-mode');
-}
-setMemorizeLabel(document.body.classList.contains('memorize-mode'));
-memorizeToggle?.addEventListener('click', () => {
-  document.body.classList.toggle('memorize-mode');
-  const on = document.body.classList.contains('memorize-mode');
+const readingModeBtn = document.getElementById('readingModeBtn');
+const studyModeBtn = document.getElementById('studyModeBtn');
+
+function applyMemorizeMode(on, scrollToGuide = false){
+  document.body.classList.toggle('memorize-mode', Boolean(on));
   localStorage.setItem('memorizeMode', on ? 'on' : 'off');
-  setMemorizeLabel(on);
-  if (on) {
-    document.getElementById('memory')?.scrollIntoView({behavior:'smooth', block:'start'});
+  setMemorizeLabel(Boolean(on));
+  announce(on ? 'تم تفعيل وضع الحفظ' : 'تم الرجوع إلى وضع القراءة');
+  readingModeBtn?.classList.toggle('active', !on);
+  studyModeBtn?.classList.toggle('active', Boolean(on));
+  readingModeBtn?.setAttribute('aria-pressed', !on ? 'true' : 'false');
+  studyModeBtn?.setAttribute('aria-pressed', on ? 'true' : 'false');
+  if (scrollToGuide) {
+    document.getElementById('modeSwitcher')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+applyMemorizeMode(localStorage.getItem('memorizeMode') === 'on');
+memorizeToggle?.addEventListener('click', () => {
+  applyMemorizeMode(!document.body.classList.contains('memorize-mode'), true);
+});
+readingModeBtn?.addEventListener('click', () => applyMemorizeMode(false, false));
+studyModeBtn?.addEventListener('click', () => applyMemorizeMode(true, false));
+
+/* Accessibility tools: screen-reader view, continuous text, and speech synthesis. */
+const screenReaderToggle = document.getElementById('screenReaderToggle');
+const screenReaderMain = document.getElementById('screenReaderMain');
+const continuousReadToggle = document.getElementById('continuousReadToggle');
+const continuousMain = document.getElementById('continuousMain');
+const continuousReading = document.getElementById('continuousReading');
+const continuousBody = document.getElementById('continuousBody');
+const readContinuous = document.getElementById('readContinuous');
+const hideContinuous = document.getElementById('hideContinuous');
+const readPageSummary = document.getElementById('readPageSummary');
+const stopSpeechButton = document.getElementById('stopSpeech');
+
+function getSectionData(section, index){
+  const card = section.querySelector('.story-card');
+  const title = card?.querySelector('h2')?.textContent.trim() || '';
+  const meta = card?.querySelector('.section-meta span')?.textContent.trim() || `المشهد ${index + 1}`;
+  const paragraphs = Array.from(card?.children || [])
+    .filter(el => el.tagName === 'P')
+    .map(p => p.textContent.trim())
+    .filter(Boolean);
+  const lesson = card?.querySelector('.lesson span')?.textContent.trim() || '';
+  const summary = card?.querySelector('.memory-summary span')?.textContent.trim() || '';
+  const question = card?.querySelector('.quiz-question')?.textContent.trim() || '';
+  const answer = card?.querySelector('.answer-card p')?.textContent.trim() || '';
+  const sources = Array.from(card?.querySelectorAll('.source-chip') || []).map(a => a.textContent.trim()).filter(Boolean);
+  return {title, meta, paragraphs, lesson, summary, question, answer, sources};
+}
+
+function sectionFullText(section, index){
+  const data = getSectionData(section, index);
+  return [
+    data.meta,
+    data.title,
+    ...data.paragraphs,
+    data.lesson ? `المغزى: ${data.lesson}` : '',
+    data.summary ? `خلاصة الحفظ: ${data.summary}` : '',
+    data.question ? `سؤال تثبيت: ${data.question}` : '',
+    data.answer ? `الجواب: ${data.answer}` : ''
+  ].filter(Boolean).join('. ');
+}
+
+function sectionSummaryText(section, index){
+  const data = getSectionData(section, index);
+  return [
+    data.title,
+    data.summary ? `خلاصة الحفظ: ${data.summary}` : '',
+    data.lesson ? `المغزى: ${data.lesson}` : '',
+    data.question ? `سؤال سريع: ${data.question}` : ''
+  ].filter(Boolean).join('. ');
+}
+
+function splitSpeechText(text){
+  const normalized = String(text || '').replace(/\s+/g,' ').trim();
+  if (!normalized) return [];
+  const sentences = normalized.split(/(?<=[.!؟؛])\s+/);
+  const chunks = [];
+  let current = '';
+  sentences.forEach(sentence => {
+    if ((current + ' ' + sentence).trim().length > 700) {
+      if (current) chunks.push(current.trim());
+      current = sentence;
+    } else {
+      current = (current + ' ' + sentence).trim();
+    }
+  });
+  if (current) chunks.push(current.trim());
+  return chunks.length ? chunks : [normalized.slice(0,700)];
+}
+
+let speechQueue = [];
+let speechIndex = 0;
+
+function getArabicVoice(){
+  const voices = window.speechSynthesis?.getVoices?.() || [];
+  return voices.find(v => /^ar/i.test(v.lang)) || voices.find(v => /arabic|عرب/i.test(v.name)) || null;
+}
+
+function stopSpeech(announceStop = true){
+  speechQueue = [];
+  speechIndex = 0;
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if (announceStop) announce('تم إيقاف القراءة الصوتية');
+}
+
+function speakNext(){
+  if (!speechQueue.length || !('speechSynthesis' in window)) return;
+  const text = speechQueue[speechIndex];
+  if (!text) {
+    speechQueue = [];
+    speechIndex = 0;
+    announce('انتهت القراءة الصوتية');
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ar';
+  utterance.rate = 0.92;
+  utterance.pitch = 1;
+  const voice = getArabicVoice();
+  if (voice) utterance.voice = voice;
+  utterance.onend = () => {
+    speechIndex += 1;
+    speakNext();
+  };
+  utterance.onerror = () => {
+    speechIndex += 1;
+    speakNext();
+  };
+  window.speechSynthesis.speak(utterance);
+}
+
+function speakText(text, label = 'النص'){
+  if (!('speechSynthesis' in window)) {
+    announce('القراءة الصوتية غير مدعومة في هذا المتصفح');
+    alert('القراءة الصوتية غير مدعومة في هذا المتصفح.');
+    return;
+  }
+  stopSpeech(false);
+  speechQueue = splitSpeechText(text);
+  speechIndex = 0;
+  announce(`بدأت قراءة ${label}`);
+  speakNext();
+}
+
+function addListenButtons(){
+  sections.forEach((section, index) => {
+    const card = section.querySelector('.story-card');
+    const heading = card?.querySelector('h2');
+    if (!card || !heading || card.querySelector('.listen-controls')) return;
+    const controls = document.createElement('div');
+    controls.className = 'listen-controls';
+    controls.setAttribute('aria-label','أدوات القراءة الصوتية لهذا المشهد');
+    controls.innerHTML = `
+      <button class="read-scene" type="button">استمع للمشهد</button>
+      <button class="read-summary" type="button">استمع للخلاصة</button>
+      <button class="stop-scene" type="button">إيقاف الصوت</button>
+    `;
+    heading.after(controls);
+    controls.querySelector('.read-scene')?.addEventListener('click', () => speakText(sectionFullText(section, index), `المشهد ${index + 1}`));
+    controls.querySelector('.read-summary')?.addEventListener('click', () => speakText(sectionSummaryText(section, index), `خلاصة المشهد ${index + 1}`));
+    controls.querySelector('.stop-scene')?.addEventListener('click', () => stopSpeech(true));
+  });
+}
+
+function buildContinuousReading(){
+  if (!continuousBody || continuousBody.dataset.ready === 'true') return;
+  const html = sections.map((section, index) => {
+    const data = getSectionData(section, index);
+    const paragraphHtml = data.paragraphs.map(p => `<p>${escapeHTML(p)}</p>`).join('');
+    const sourceText = data.sources.slice(0,2).join('، ');
+    return `
+      <article class="continuous-item">
+        <h3>${String(index + 1).padStart(2,'0')} — ${escapeHTML(data.title)}</h3>
+        ${paragraphHtml}
+        ${data.summary ? `<p class="continuous-memory">خلاصة الحفظ: ${escapeHTML(data.summary)}</p>` : ''}
+        ${data.lesson ? `<p><b>المغزى:</b> ${escapeHTML(data.lesson)}</p>` : ''}
+        ${data.question ? `<p><b>سؤال:</b> ${escapeHTML(data.question)}</p>` : ''}
+        ${data.answer ? `<p><b>الجواب:</b> ${escapeHTML(data.answer)}</p>` : ''}
+        ${sourceText ? `<p><b>مصدر التثبيت:</b> ${escapeHTML(sourceText)}</p>` : ''}
+      </article>
+    `;
+  }).join('');
+  continuousBody.innerHTML = html;
+  continuousBody.dataset.ready = 'true';
+}
+
+function showContinuous(scroll = true){
+  buildContinuousReading();
+  if (continuousReading) continuousReading.hidden = false;
+  if (scroll) continuousReading?.scrollIntoView({behavior:'smooth', block:'start'});
+  announce('تم عرض السيرة كنص متصل');
+}
+
+function hideContinuousSection(){
+  if (continuousReading) continuousReading.hidden = true;
+  announce('تم إخفاء النص المتصل');
+}
+
+function setScreenReaderLabel(on){
+  const text = on ? 'عادي' : 'قارئ';
+  const label = on ? 'إيقاف وضع قارئ الشاشة والعودة للعرض العادي' : 'تفعيل وضع قارئ الشاشة';
+  if (screenReaderToggle) {
+    screenReaderToggle.innerHTML = `<span aria-hidden="true">${on ? '↩' : '♿'}</span><b>${text}</b>`;
+    screenReaderToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    screenReaderToggle.setAttribute('aria-label', label);
+  }
+  if (screenReaderMain) {
+    screenReaderMain.textContent = on ? 'إيقاف وضع قارئ الشاشة' : 'تفعيل وضع قارئ الشاشة';
+    screenReaderMain.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+}
+
+function applyScreenReaderMode(on, scroll = false){
+  document.body.classList.toggle('screen-reader-mode', Boolean(on));
+  localStorage.setItem('screenReaderMode', on ? 'on' : 'off');
+  setScreenReaderLabel(Boolean(on));
+  if (on) showContinuous(false);
+  if (scroll) document.getElementById('accessibility')?.scrollIntoView({behavior:'smooth', block:'start'});
+  announce(on ? 'تم تفعيل وضع قارئ الشاشة' : 'تم إيقاف وضع قارئ الشاشة');
+}
+
+function pageSummaryText(){
+  return [
+    'سلمان الفارسي، الباحث عن الحقيقة.',
+    'ولد في فارس، وخرج باحثًا عن اليقين، وتنقل بين المعلمين حتى وصل إلى المدينة.',
+    'عرف النبي صلى الله عليه وسلم بعلامات ثلاث: لا يأكل الصدقة، ويأكل الهدية، وبين كتفيه خاتم النبوة.',
+    'اشتهر يوم الخندق برأيه في حفر الخندق، وعُرف بالزهد والتواضع وفقه التوازن.',
+    'هذه السيرة تركز على صدق البحث، وخدمة الحق، والتواضع بعد المكانة.'
+  ].join(' ');
+}
+
+addListenButtons();
+buildContinuousReading();
+
+applyScreenReaderMode(localStorage.getItem('screenReaderMode') === 'on', false);
+screenReaderToggle?.addEventListener('click', () => applyScreenReaderMode(!document.body.classList.contains('screen-reader-mode'), true));
+screenReaderMain?.addEventListener('click', () => applyScreenReaderMode(!document.body.classList.contains('screen-reader-mode'), true));
+continuousReadToggle?.addEventListener('click', () => showContinuous(true));
+continuousMain?.addEventListener('click', () => showContinuous(true));
+hideContinuous?.addEventListener('click', hideContinuousSection);
+readContinuous?.addEventListener('click', () => {
+  buildContinuousReading();
+  const text = Array.from(continuousBody?.querySelectorAll('.continuous-item') || []).map(el => el.textContent.trim()).join('. ');
+  speakText(text, 'النص المتصل');
+});
+readPageSummary?.addEventListener('click', () => speakText(pageSummaryText(), 'خلاصة السيرة'));
+stopSpeechButton?.addEventListener('click', () => stopSpeech(true));
+
+document.addEventListener('toggle', (event) => {
+  const details = event.target;
+  if (!(details instanceof HTMLDetailsElement) || !details.open) return;
+  if (details.classList.contains('answer-card') || details.classList.contains('memory-answer')) {
+    announce('تم إظهار الجواب');
+  } else if (details.classList.contains('sources-drawer')) {
+    announce('تم فتح مصادر هذا المشهد');
+  }
+}, true);
+
+
+// Floating quick tools menu
+const quickTools = document.getElementById('quickTools');
+const quickToolsToggle = document.getElementById('quickToolsToggle');
+const quickToolsMenu = document.getElementById('quickToolsMenu');
+function setQuickToolsOpen(open){
+  quickTools?.classList.toggle('open', Boolean(open));
+  quickToolsToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+  quickToolsToggle?.setAttribute('aria-label', open ? 'إغلاق الأدوات السريعة' : 'فتح الأدوات السريعة');
+  announce(open ? 'تم فتح الأدوات السريعة' : 'تم إغلاق الأدوات السريعة');
+}
+quickToolsToggle?.addEventListener('click', (event) => {
+  event.stopPropagation();
+  setQuickToolsOpen(!quickTools?.classList.contains('open'));
+});
+quickToolsMenu?.addEventListener('click', (event) => {
+  const target = event.target.closest('a');
+  if (target) setQuickToolsOpen(false);
+});
+document.addEventListener('click', (event) => {
+  if (quickTools?.classList.contains('open') && !quickTools.contains(event.target)) {
+    setQuickToolsOpen(false);
+  }
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && quickTools?.classList.contains('open')) {
+    setQuickToolsOpen(false);
+    quickToolsToggle?.focus({preventScroll:true});
   }
 });
 
@@ -232,6 +525,7 @@ function openToc(){
   if (!window.matchMedia('(max-width: 760px)').matches) {
     setTimeout(() => filter?.focus({preventScroll:true}), 80);
   }
+  announce('تم فتح الفهرس');
 }
 function closeToc(){
   document.body.classList.remove('toc-open');
@@ -239,6 +533,7 @@ function closeToc(){
   tocDrawer?.setAttribute('aria-hidden','true');
   if (tocBackdrop) tocBackdrop.hidden = true;
   tocToggle?.focus({preventScroll:true});
+  announce('تم إغلاق الفهرس');
 }
 
 tocToggle?.addEventListener('click', () => {

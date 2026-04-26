@@ -18,6 +18,7 @@
 <body>
   <a class="skip-link" href="#content">تجاوز إلى المحتوى</a>
   <div class="reading-progress" aria-hidden="true"><span id="progressBar"></span></div>
+  <div class="sr-only" id="liveRegion" aria-live="polite" aria-atomic="true"></div>
 
   <button class="toc-toggle" id="tocToggle" type="button" aria-controls="tocDrawer" aria-expanded="false">
     <span aria-hidden="true">&#9776;</span>
@@ -25,20 +26,29 @@
   </button>
   <div class="toc-backdrop" id="tocBackdrop" hidden></div>
 
+  <div class="quick-tools" id="quickTools" aria-label="أدوات سريعة">
+    <button class="quick-tools-toggle" id="quickToolsToggle" type="button" aria-controls="quickToolsMenu" aria-expanded="false" aria-label="فتح الأدوات السريعة">
+      <span aria-hidden="true">⚙</span><span class="quick-toggle-label">أدوات</span>
+    </button>
+    <div class="quick-tools-menu" id="quickToolsMenu" role="menu" aria-label="قائمة الأدوات السريعة">
+      <a class="quick-action" href="#sources" role="menuitem" aria-label="الانتقال إلى المصادر"><span aria-hidden="true">📚</span><b>المصادر</b></a>
+      <button class="quick-action" id="screenReaderToggle" type="button" role="menuitem" aria-label="تفعيل وضع قارئ الشاشة"><span aria-hidden="true">♿</span><b>قارئ</b></button>
+      <button class="quick-action" id="continuousReadToggle" type="button" role="menuitem" aria-label="عرض قراءة السيرة كنص متصل"><span aria-hidden="true">☰</span><b>نص</b></button>
+      <button class="quick-action" id="stopSpeech" type="button" role="menuitem" aria-label="إيقاف القراءة الصوتية"><span aria-hidden="true">■</span><b>إيقاف</b></button>
+      <button class="quick-action" id="fontIncrease" type="button" role="menuitem" aria-label="تكبير الخط"><span aria-hidden="true">A+</span><b>تكبير</b></button>
+      <button class="quick-action" id="fontDecrease" type="button" role="menuitem" aria-label="تصغير الخط"><span aria-hidden="true">A−</span><b>تصغير</b></button>
+      <button class="quick-action" id="memorizeToggle" type="button" role="menuitem" aria-label="تفعيل وضع الحفظ"><span aria-hidden="true">▣</span><b>الحفظ</b></button>
+      <button class="quick-action" id="themeToggle" type="button" role="menuitem" aria-label="تبديل المظهر"><span aria-hidden="true">☾</span><b>ليل</b></button>
+      <a class="quick-action" href="#top" role="menuitem" aria-label="العودة إلى الأعلى"><span aria-hidden="true">↑</span><b>الأعلى</b></a>
+    </div>
+  </div>
+
   <header class="hero" id="top">
     <nav class="topbar" aria-label="التنقل الرئيسي">
       <a class="brand" href="#top" aria-label="العودة إلى البداية">
         <span class="brand-mark">✦</span>
         <span>سلمان الفارسي</span>
       </a>
-      <div class="nav-actions">
-        <a href="#memory">الحفظ</a>
-        <a href="#sources">المصادر</a>
-        <button id="fontIncrease" type="button" aria-label="تكبير الخط">تكبير الخط</button>
-        <button id="fontDecrease" type="button" aria-label="تصغير الخط">تصغير الخط</button>
-        <button id="memorizeToggle" type="button" aria-label="تفعيل وضع الحفظ">وضع الحفظ</button>
-        <button id="themeToggle" type="button" aria-label="تبديل المظهر">الوضع الليلي</button>
-      </div>
     </nav>
 
     <div class="hero-grid">
@@ -104,11 +114,67 @@
       </div>
     </aside>
 
+    <section class="mode-switcher" id="modeSwitcher" aria-labelledby="mode-title">
+      <div class="mode-status-card reading-active">
+        <p class="eyebrow">طريقة العرض الحالية</p>
+        <h2 id="mode-title">أنت الآن في وضع القراءة</h2>
+        <p class="mode-status-text">
+          تظهر القصة كاملة: صور، سرد قصصي، مغزى، أسئلة، ومصادر. هذا الوضع مناسب للفهم والقراءة الهادئة.
+        </p>
+      </div>
+      <div class="mode-options" role="group" aria-label="اختيار وضع العرض">
+        <button id="readingModeBtn" class="mode-option active" type="button">
+          <span>وضع القراءة</span>
+          <small>القصة كاملة بالتفصيل</small>
+        </button>
+        <button id="studyModeBtn" class="mode-option" type="button">
+          <span>وضع الحفظ</span>
+          <small>بطاقات قصيرة للاختبار</small>
+        </button>
+      </div>
+      <div class="mode-difference" aria-label="الفرق بين الوضعين">
+        <article>
+          <strong>في القراءة</strong>
+          <p>تقرئين السيرة كسرد متصل مع الصور والمصادر.</p>
+        </article>
+        <article>
+          <strong>في الحفظ</strong>
+          <p>تختفي الفقرات الطويلة وتظهر جملة الحفظ، المغزى، السؤال، والجواب المخفي.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="accessibility-panel" id="accessibility" aria-labelledby="accessibility-title">
+      <div>
+        <p class="eyebrow">إتاحة وقراءة صوتية</p>
+        <h2 id="accessibility-title">أدوات مساعدة للمكفوفين وضعاف البصر</h2>
+        <p>يمكن تحويل الصفحة إلى عرض خطي أبسط لقارئ الشاشة، أو فتح السيرة كنص متصل، أو تشغيل قراءة صوتية لكل مشهد من أزرار المشاهد نفسها.</p>
+      </div>
+      <div class="accessibility-actions" role="group" aria-label="أدوات الإتاحة">
+        <button id="screenReaderMain" type="button">تفعيل وضع قارئ الشاشة</button>
+        <button id="continuousMain" type="button">عرض السيرة كنص متصل</button>
+        <button id="readPageSummary" type="button">استمع إلى الخلاصة</button>
+      </div>
+    </section>
+
+    <section class="continuous-reading" id="continuousReading" aria-labelledby="continuous-title" hidden>
+      <div class="continuous-head">
+        <p class="eyebrow">قراءة متصلة</p>
+        <h2 id="continuous-title">السيرة كنص واحد مناسب لقارئ الشاشة</h2>
+        <p>هذه النسخة تجمع المحاور دون صور أو بطاقات، لتسهيل القراءة الصوتية والنسخ والمراجعة.</p>
+        <div class="continuous-actions">
+          <button id="readContinuous" type="button">استمع للنص المتصل</button>
+          <button id="hideContinuous" type="button">إخفاء النص المتصل</button>
+        </div>
+      </div>
+      <div class="continuous-body" id="continuousBody"></div>
+    </section>
+
     <section class="memory-panel" id="memory" aria-labelledby="memory-title">
       <div class="memory-copy">
-        <p class="eyebrow">مساعدة للحفظ</p>
-        <h2 id="memory-title">طريقة سهلة لتثبيت السيرة</h2>
-        <p>عند تشغيل وضع الحفظ يتحول الموقع كله من سرد طويل إلى بطاقات تثبيت قصيرة: عنوان، جملة للحفظ، مغزى، سؤال مراجعة، وجواب مخفي. يبقى النص الكامل موجودًا لمن يريد الرجوع إليه.</p>
+        <p class="eyebrow">تظهر بوضوح عند وضع الحفظ</p>
+        <h2 id="memory-title">خطة الحفظ والمراجعة</h2>
+        <p>هذا القسم يشرح طريقة الاستفادة من بطاقات الحفظ. في وضع القراءة يبقى الموقع قصة كاملة، أما في وضع الحفظ فيصبح كل محور بطاقة قصيرة للاختبار والمراجعة.</p>
       </div>
       <div class="memory-steps" aria-label="خطوات الحفظ">
         <article>
@@ -137,7 +203,7 @@
       
 <section class="story-section" id="intro" data-keywords="سلمان رجل بدأ رحلته بسؤال تمهيد الباحث عن الحقيقة">
   <div class="story-art">
-    <img src="assets/img/intro_question.svg" alt="" loading="lazy">
+    <img src="assets/img/intro_question.svg" alt="رسم تعبيري لسؤال داخلي يبدأ رحلة البحث عن الحقيقة" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -178,7 +244,7 @@
 
 <section class="story-section" id="identity" data-keywords="من فارس: قلب لا يرضى بالوراثة العمياء المشهد الأول">
   <div class="story-art">
-    <img src="assets/img/persia_fire.svg" alt="" loading="lazy">
+    <img src="assets/img/persia_fire.svg" alt="رسم تعبيري لنشأة سلمان في فارس وبيئة النار قبل الإسلام" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -220,7 +286,7 @@
 
 <section class="story-section" id="search" data-keywords="حين سمع الصلاة تغيّر اتجاه العمر المشهد الثاني">
   <div class="story-art">
-    <img src="assets/img/church_moment.svg" alt="" loading="lazy">
+    <img src="assets/img/church_moment.svg" alt="رسم تعبيري للحظة سماع سلمان صلاة في الكنيسة" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -261,7 +327,7 @@
 
 <section class="story-section" id="teachers" data-keywords="من الشام إلى الموصل ونصيبين وعمورية: شيخ يسلّمه إلى شيخ المشهد الثالث">
   <div class="story-art">
-    <img src="assets/img/teachers_chain.svg" alt="" loading="lazy">
+    <img src="assets/img/teachers_chain.svg" alt="رسم تعبيري لسلسلة المعلمين الذين انتقل بينهم سلمان" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -302,7 +368,7 @@
 
 <section class="story-section" id="signs" data-keywords="ثلاث علامات، وقلب يقترب من اليقين المشهد الرابع">
   <div class="story-art">
-    <img src="assets/img/three_signs.svg" alt="" loading="lazy">
+    <img src="assets/img/three_signs.svg" alt="رسم تعبيري للعلامات الثلاث التي انتظرها سلمان للنبي" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -343,7 +409,7 @@
 
 <section class="story-section" id="freedom" data-keywords="من رقّ البشر إلى حرية الإيمان المشهد الخامس">
   <div class="story-art">
-    <img src="assets/img/freedom_palms.svg" alt="" loading="lazy">
+    <img src="assets/img/freedom_palms.svg" alt="رسم تعبيري للنخل والعتق من الرق" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -383,7 +449,7 @@
 
 <section class="story-section" id="trench" data-keywords="الخندق: حين صارت الخبرة الفارسية حماية للمدينة المشهد السادس">
   <div class="story-art">
-    <img src="assets/img/trench_city.svg" alt="" loading="lazy">
+    <img src="assets/img/trench_city.svg" alt="رسم تعبيري للخندق حول المدينة" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -425,7 +491,7 @@
 
 <section class="story-section" id="ahlbayt" data-keywords="سلمان منا: انتماء الإيمان فوق جغرافيا الدم المشهد السابع">
   <div class="story-art">
-    <img src="assets/img/belonging_circle.svg" alt="" loading="lazy">
+    <img src="assets/img/belonging_circle.svg" alt="رسم تعبيري لانتماء سلمان الإيماني بين الصحابة" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -465,7 +531,7 @@
 
 <section class="story-section" id="balance" data-keywords="مع أبي الدرداء: العبادة التي لا تظلم البيت ولا النفس المشهد الثامن">
   <div class="story-art">
-    <img src="assets/img/balance_rights.svg" alt="" loading="lazy">
+    <img src="assets/img/balance_rights.svg" alt="رسم تعبيري لميزان الحقوق في قصة أبي الدرداء" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -505,7 +571,7 @@
 
 <section class="story-section" id="virtue" data-keywords="الإيمان عند الثريا: سلمان رمز أمة أوسع من العرب المشهد التاسع">
   <div class="story-art">
-    <img src="assets/img/stars_thuraya.svg" alt="" loading="lazy">
+    <img src="assets/img/stars_thuraya.svg" alt="رسم تعبيري للثريا ورمزية طلب الإيمان والعلم" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -546,7 +612,7 @@
 
 <section class="story-section" id="madain" data-keywords="أمير المدائن: السلطة التي لم تُغيّر هيئة القلب المشهد العاشر">
   <div class="story-art">
-    <img src="assets/img/madain_humility.svg" alt="" loading="lazy">
+    <img src="assets/img/madain_humility.svg" alt="رسم تعبيري لتواضع سلمان وهو أمير المدائن" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
@@ -587,7 +653,7 @@
 
 <section class="story-section" id="death" data-keywords="رحيل في المدائن، وبقاء معنى الباحث الخاتمة">
   <div class="story-art">
-    <img src="assets/img/farewell_madain.svg" alt="" loading="lazy">
+    <img src="assets/img/farewell_madain.svg" alt="رسم تعبيري لرحيل سلمان في المدائن" loading="lazy">
   </div>
   <article class="story-card">
     <div class="section-meta">
