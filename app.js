@@ -127,7 +127,9 @@ function openToc(){
   tocToggle?.setAttribute('aria-expanded','true');
   tocDrawer?.setAttribute('aria-hidden','false');
   if (tocBackdrop) tocBackdrop.hidden = false;
-  setTimeout(() => filter?.focus({preventScroll:true}), 80);
+  if (!window.matchMedia('(max-width: 760px)').matches) {
+    setTimeout(() => filter?.focus({preventScroll:true}), 80);
+  }
 }
 function closeToc(){
   document.body.classList.remove('toc-open');
