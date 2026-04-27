@@ -528,7 +528,7 @@ main > .references{grid-column:auto;grid-row:auto}
 
 .toc-toggle{
   position:fixed;
-  right:16px;
+  right:max(12px, env(safe-area-inset-right) + 12px);
   top:50%;
   transform:translateY(-50%);
   z-index:80;
@@ -712,8 +712,9 @@ img, svg{max-width:100%;height:auto}
 
   .toc-toggle{
     top:auto;
-    bottom:14px;
-    right:12px;
+    bottom:max(8px, env(safe-area-inset-bottom) + 8px);
+    right:max(8px, env(safe-area-inset-right) + 8px);
+    left:auto;
     transform:none;
     min-height:44px;
     border-radius:999px;
@@ -1017,8 +1018,10 @@ body.memorize-mode #readingModeBtn small{color:var(--muted)}
 .brand{padding-inline:6px}
 .quick-tools{
   position:fixed;
-  left:16px;
-  bottom:16px;
+  left:max(8px, env(safe-area-inset-left) + 8px);
+  bottom:max(8px, env(safe-area-inset-bottom) + 8px);
+  right:auto;
+  top:auto;
   z-index:96;
   display:grid;
   gap:10px;
@@ -1106,8 +1109,10 @@ body.memorize-mode #readingModeBtn small{color:var(--muted)}
   }
   .brand{justify-content:center;font-size:1rem}
   .quick-tools{
-    left:12px;
-    bottom:12px;
+    left:max(6px, env(safe-area-inset-left) + 6px);
+    bottom:max(6px, env(safe-area-inset-bottom) + 6px);
+    right:auto;
+    top:auto;
     gap:8px;
   }
   .quick-tools-toggle{
@@ -1305,4 +1310,12 @@ body.screen-reader-mode .quick-tools-menu{
     overflow:auto;
     overscroll-behavior:contain;
   }
+}
+
+
+/* Position tuning: keep floating buttons anchored tightly to the lower corners on mobile. */
+@media (max-width:760px){
+  .quick-tools,
+  .toc-toggle{margin:0!important}
+  .quick-tools{align-items:flex-start}
 }
