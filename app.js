@@ -208,7 +208,7 @@ memorizeToggle?.addEventListener('click', () => {
 readingModeBtn?.addEventListener('click', () => applyMemorizeMode(false, false));
 studyModeBtn?.addEventListener('click', () => applyMemorizeMode(true, false));
 
-/* Accessibility tools: screen-reader view, continuous text, and speech synthesis. */
+/* Accessibility tools: screen-reader view, continuous text, and MP3 audio playback. */
 const screenReaderToggle = document.getElementById('screenReaderToggle');
 const screenReaderMain = document.getElementById('screenReaderMain');
 const continuousReadToggle = document.getElementById('continuousReadToggle');
@@ -259,76 +259,44 @@ function sectionSummaryText(section, index){
   ].filter(Boolean).join('. ');
 }
 
-function splitSpeechText(text){
-  const normalized = String(text || '').replace(/\s+/g,' ').trim();
-  if (!normalized) return [];
-  const sentences = normalized.split(/(?<=[.!؟؛])\s+/);
-  const chunks = [];
-  let current = '';
-  sentences.forEach(sentence => {
-    if ((current + ' ' + sentence).trim().length > 700) {
-      if (current) chunks.push(current.trim());
-      current = sentence;
-    } else {
-      current = (current + ' ' + sentence).trim();
-    }
+const audioSources = {
+  intro: './assets/audio/intro.mp3'
+};
+let activeAudio = null;
+
+function stopAudio(announceStop = true){
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+    activeAudio = null;
+  }
+  if (announceStop) announce('تم إيقاف التسجيل الصوتي');
+}
+
+function playAudio(src, label = 'التسجيل'){
+  if (!src) {
+    audioNotReady(label);
+    return;
+  }
+  stopAudio(false);
+  activeAudio = new Audio(src);
+  activeAudio.preload = 'auto';
+  activeAudio.addEventListener('ended', () => announce('انتهى التسجيل الصوتي'));
+  activeAudio.addEventListener('error', () => {
+    announce('تعذر تشغيل الملف الصوتي');
+    alert('تعذر تشغيل الملف الصوتي. تأكد من رفع الملف داخل assets/audio بالاسم الصحيح.');
   });
-  if (current) chunks.push(current.trim());
-  return chunks.length ? chunks : [normalized.slice(0,700)];
+  activeAudio.play().then(() => {
+    announce(`بدأ تشغيل ${label}`);
+  }).catch(() => {
+    announce('تعذر تشغيل التسجيل الصوتي');
+    alert('تعذر تشغيل التسجيل الصوتي. جرّب الضغط مرة أخرى أو تأكد من أن الملف مرفوع على GitHub.');
+  });
 }
 
-let speechQueue = [];
-let speechIndex = 0;
-
-function getArabicVoice(){
-  const voices = window.speechSynthesis?.getVoices?.() || [];
-  return voices.find(v => /^ar/i.test(v.lang)) || voices.find(v => /arabic|عرب/i.test(v.name)) || null;
-}
-
-function stopSpeech(announceStop = true){
-  speechQueue = [];
-  speechIndex = 0;
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  if (announceStop) announce('تم إيقاف القراءة الصوتية');
-}
-
-function speakNext(){
-  if (!speechQueue.length || !('speechSynthesis' in window)) return;
-  const text = speechQueue[speechIndex];
-  if (!text) {
-    speechQueue = [];
-    speechIndex = 0;
-    announce('انتهت القراءة الصوتية');
-    return;
-  }
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ar';
-  utterance.rate = 0.92;
-  utterance.pitch = 1;
-  const voice = getArabicVoice();
-  if (voice) utterance.voice = voice;
-  utterance.onend = () => {
-    speechIndex += 1;
-    speakNext();
-  };
-  utterance.onerror = () => {
-    speechIndex += 1;
-    speakNext();
-  };
-  window.speechSynthesis.speak(utterance);
-}
-
-function speakText(text, label = 'النص'){
-  if (!('speechSynthesis' in window)) {
-    announce('القراءة الصوتية غير مدعومة في هذا المتصفح');
-    alert('القراءة الصوتية غير مدعومة في هذا المتصفح.');
-    return;
-  }
-  stopSpeech(false);
-  speechQueue = splitSpeechText(text);
-  speechIndex = 0;
-  announce(`بدأت قراءة ${label}`);
-  speakNext();
+function audioNotReady(label = 'هذا الجزء'){
+  announce(`لا يوجد تسجيل صوتي جاهز لـ ${label}`);
+  alert(`لا يوجد تسجيل صوتي جاهز لـ ${label} بعد. ارفع ملف MP3 لهذا الجزء حتى يعمل الزر. هذه النسخة لا تستخدم القراءة الآلية.`);
 }
 
 function addListenButtons(){
@@ -336,18 +304,20 @@ function addListenButtons(){
     const card = section.querySelector('.story-card');
     const heading = card?.querySelector('h2');
     if (!card || !heading || card.querySelector('.listen-controls')) return;
+    const src = audioSources[section.id];
     const controls = document.createElement('div');
     controls.className = 'listen-controls';
-    controls.setAttribute('aria-label','أدوات القراءة الصوتية لهذا المشهد');
+    controls.setAttribute('aria-label','أدوات التسجيل الصوتي لهذا المشهد');
     controls.innerHTML = `
-      <button class="read-scene" type="button">استمع للمشهد</button>
-      <button class="read-summary" type="button">استمع للخلاصة</button>
+      <button class="read-scene" type="button" ${src ? '' : 'disabled aria-disabled="true"'}>${src ? 'استمع للتسجيل' : 'التسجيل غير مرفوع بعد'}</button>
       <button class="stop-scene" type="button">إيقاف الصوت</button>
     `;
     heading.after(controls);
-    controls.querySelector('.read-scene')?.addEventListener('click', () => speakText(sectionFullText(section, index), `المشهد ${index + 1}`));
-    controls.querySelector('.read-summary')?.addEventListener('click', () => speakText(sectionSummaryText(section, index), `خلاصة المشهد ${index + 1}`));
-    controls.querySelector('.stop-scene')?.addEventListener('click', () => stopSpeech(true));
+    controls.querySelector('.read-scene')?.addEventListener('click', () => {
+      if (src) playAudio(src, `تسجيل ${heading.textContent.trim() || 'المشهد'}`);
+      else audioNotReady(`المشهد ${index + 1}`);
+    });
+    controls.querySelector('.stop-scene')?.addEventListener('click', () => stopAudio(true));
   });
 }
 
@@ -427,13 +397,9 @@ screenReaderMain?.addEventListener('click', () => applyScreenReaderMode(!documen
 continuousReadToggle?.addEventListener('click', () => showContinuous(true));
 continuousMain?.addEventListener('click', () => showContinuous(true));
 hideContinuous?.addEventListener('click', hideContinuousSection);
-readContinuous?.addEventListener('click', () => {
-  buildContinuousReading();
-  const text = Array.from(continuousBody?.querySelectorAll('.continuous-item') || []).map(el => el.textContent.trim()).join('. ');
-  speakText(text, 'النص المتصل');
-});
-readPageSummary?.addEventListener('click', () => speakText(pageSummaryText(), 'خلاصة السيرة'));
-stopSpeechButton?.addEventListener('click', () => stopSpeech(true));
+readContinuous?.addEventListener('click', () => audioNotReady('النص المتصل'));
+readPageSummary?.addEventListener('click', () => audioNotReady('خلاصة السيرة'));
+stopSpeechButton?.addEventListener('click', () => stopAudio(true));
 
 document.addEventListener('toggle', (event) => {
   const details = event.target;

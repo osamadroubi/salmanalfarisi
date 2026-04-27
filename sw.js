@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salman-farsi-v9-accessibility';
+const CACHE_NAME = 'salman-farsi-v10-mp3-intro';
 const ASSETS = [
   './',
   './index.html',
@@ -22,7 +22,8 @@ const ASSETS = [
   './assets/img/balance_rights.svg',
   './assets/img/stars_thuraya.svg',
   './assets/img/madain_humility.svg',
-  './assets/img/farewell_madain.svg'
+  './assets/img/farewell_madain.svg',
+  './assets/audio/intro.mp3'
 ];
 
 self.addEventListener('install', event => {
